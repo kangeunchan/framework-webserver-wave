@@ -15,13 +15,15 @@ typedef enum {
     GET,
     POST,
     PUT,
-    DELETE
+    DELETE,
+    PATCH
 } HttpMethod;
 
 typedef struct {
     HttpMethod method;
     char path[256];
     char body[MAX_REQUEST_SIZE];
+    char json_path[256];
 } HttpRequest;
 
 typedef struct {
@@ -55,5 +57,27 @@ void start_server(WebFramework* framework, int port);
 void send_response(int client_socket, HttpResponse* response);
 void parse_request(char* request_str, HttpRequest* request);
 const char* method_to_string(HttpMethod method);
+
+void Json_parser(char* request_str, HttpRequest* request);
+
+#define MAX_JSON_FIELDS 20
+
+typedef struct {
+    char key[50];
+    char value[256];
+} JsonField;
+
+typedef struct {
+    JsonField fields[MAX_JSON_FIELDS];
+    int field_count;
+} JsonObject;
+
+#define JSON_ADD_STRING(obj, k, v) \
+    strncpy(obj.fields[obj.field_count].key, k, sizeof(obj.fields[obj.field_count].key)); \
+    strncpy(obj.fields[obj.field_count].value, v, sizeof(obj.fields[obj.field_count].value)); \
+    obj.field_count++;
+
+void json_to_string(JsonObject* obj, char* output, size_t output_size);
+void set_json_response_from_object(HttpResponse* response, int status_code, JsonObject* json_obj);
 
 #endif
