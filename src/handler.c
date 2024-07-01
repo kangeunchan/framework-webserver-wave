@@ -18,5 +18,6 @@ void handle_request(WebFramework* framework, HttpRequest* request, HttpResponse*
     }
 
     response->status_code = 404;
-    strcpy(response->content, "Not Found");
+    strncpy(response->content, "Not Found", sizeof(response->content) - 1);
+    response->content[sizeof(response->content) - 1] = '\0';
 }

@@ -1,8 +1,8 @@
 #include "wave.h"
 
-void parse_request(char* request_str, HttpRequest* request) {
-    char  method_str[8];
-    sscanf(request_str, "%s %s", method_str, request->path);
+void parse_request(const char* request_str, HttpRequest* request) {
+    char method_str[8];
+    sscanf(request_str, "%7s %255s", method_str, request->path);
 
     if (strcmp(method_str, "GET") == 0) {
         request->method = GET;
@@ -16,9 +16,10 @@ void parse_request(char* request_str, HttpRequest* request) {
         request->method = PATCH;
     }
 
-    char* body_start = strstr(request_str, "\r\n\r\n");
+    const char* body_start = strstr(request_str, "\r\n\r\n");
     if (body_start) {
-        strcpy(request->body, body_start + 4);
+        strncpy(request->body, body_start + 4, sizeof(request->body) - 1);
+        request->body[sizeof(request->body) - 1] = '\0';
     }
 }
 

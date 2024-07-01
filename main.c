@@ -1,35 +1,53 @@
 #include "wave.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-// 예제 JSON 응답 핸들러
-void hello_handler(HttpRequest* request, HttpResponse* response) {
-    JsonObject json_obj = {0};
-    JSON_ADD_STRING(json_obj, "message", "Hello, World!");
-    JSON_ADD_STRING(json_obj, "status", "success");
-    set_json_response_from_object(response, 200, &json_obj);
+// GET 요청을 처리하는 핸들러
+void home_handler(HttpRequest* request, HttpResponse* response) {
+    strcpy(response->content, "Welcome! Send a POST request to /echo to test.");
+    response->status_code = 200;
 }
 
-// 사용자 정보를 반환하는 핸들러
-void user_handler(HttpRequest* request, HttpResponse* response) {
-    JsonObject json_obj = {0};
-    JSON_ADD_STRING(json_obj, "name", "John Doe");
-    JSON_ADD_STRING(json_obj, "email", "john.doe@example.com");
-    JSON_ADD_STRING(json_obj, "role", "admin");
-    set_json_response_from_object(response, 200, &json_obj);
+// POST 요청을 처리하는 핸들러
+void echo_handler(HttpRequest* request, HttpResponse* response) {
+    if (request->method != POST) {
+        response->status_code = 405;
+        strcpy(response->content, "Method Not Allowed");
+        return;
+    }
+
+    // 요청 본문에서 직접 "message" 필드를 찾습니다.
+    char* message_start = strstr(request->body, "\"message\"");
+    char echoed_message[256] = "Echoed: ";
+    
+    if (message_start) {
+        message_start = strchr(message_start, ':');
+        if (message_start) {
+            message_start++; // ':' 다음으로 이동
+            while (*message_start == ' ' || *message_start == '"') message_start++; // 공백과 따옴표 건너뛰기
+            
+            char* message_end = strchr(message_start, '"');
+            if (message_end) {
+                size_t message_length = message_end - message_start;
+                strncat(echoed_message, message_start, message_length);
+            }
+        }
+    }
+
+    // JSON 응답 생성
+    JsonObject response_json = {0};
+    JSON_ADD_STRING(response_json, "echo", echoed_message);
+    set_json_response_from_object(response, 200, &response_json);
 }
 
-// 404 Not Found 핸들러
-void not_found_handler(HttpRequest* request, HttpResponse* response) {
-    JsonObject json_obj = {0};
-    JSON_ADD_STRING(json_obj, "error", "Not Found");
-    JSON_ADD_STRING(json_obj, "message", "The requested resource was not found");
-    set_json_response_from_object(response, 404, &json_obj);
-}
-
-// 미들웨어 예제: 로깅
-void logging_middleware(HttpRequest* request, HttpResponse* response, int* next) {
+// 로깅 미들웨어
+void logger_middleware(HttpRequest* request, HttpResponse* response, int* next) {
     printf("Received %s request for %s\n", method_to_string(request->method), request->path);
-    *next = 1; // 다음 미들웨어 또는 핸들러로 진행
+    if (request->method == POST) {
+        printf("Request body: %s\n", request->body);
+    }
+    (*next)++;
 }
 
 int main() {
@@ -37,16 +55,14 @@ int main() {
     init_framework(&framework);
 
     // 미들웨어 추가
-    add_middleware(&framework, logging_middleware);
+    add_middleware(&framework, logger_middleware);
 
     // 라우트 추가
-    add_route(&framework, GET, "/hello", hello_handler);
-    add_route(&framework, GET, "/user", user_handler);
+    add_route(&framework, GET, "/", home_handler);
+    add_route(&framework, POST, "/echo", echo_handler);
 
-    // 404 Not Found 핸들러 추가
-    add_route(&framework, GET, "/*", not_found_handler);
-
-    printf("Starting server on port 8080...\n");
+    // 서버 시작
+    printf("Server starting on port 8080...\n");
     start_server(&framework, 8080);
 
     return 0;

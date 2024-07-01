@@ -1,4 +1,6 @@
 #include "wave.h"
+#include <sys/socket.h>
+#include <arpa/inet.h>
 
 void start_server(WebFramework* framework, int port) {
     int server_fd, new_socket;
@@ -29,12 +31,16 @@ void start_server(WebFramework* framework, int port) {
     while (1) {
         if ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) < 0) {
             perror("accept");
-            close(server_fd);
-            exit(EXIT_FAILURE);
+            continue;
         }
 
         char buffer[MAX_REQUEST_SIZE] = {0};
-        read(new_socket, buffer, MAX_REQUEST_SIZE);
+        ssize_t valread = read(new_socket, buffer, MAX_REQUEST_SIZE - 1);
+        if (valread < 0) {
+            perror("read");
+            close(new_socket);
+            continue;
+        }
 
         HttpRequest request;
         HttpResponse response;
@@ -45,11 +51,6 @@ void start_server(WebFramework* framework, int port) {
 
         close(new_socket);
     }
-}
 
-void send_response(int client_socket, HttpResponse* response) {
-    char buffer[MAX_REQUEST_SIZE];
-    snprintf(buffer, sizeof(buffer), "HTTP/1.1 %d OK\r\nContent-Length: %lu\r\n\r\n%s",
-            response->status_code, strlen(response->content), response->content);
-    send(client_socket, buffer, strlen(buffer), 0);
+    close(server_fd);
 }

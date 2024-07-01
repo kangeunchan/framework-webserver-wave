@@ -10,6 +10,8 @@
 #define MAX_REQUEST_SIZE 4096
 #define MAX_ROUTE_COUNT 100
 #define MAX_MIDDLEWARE_COUNT 50
+#define MAX_PATH_LENGTH 256
+#define MAX_JSON_FIELDS 20
 
 typedef enum {
     GET,
@@ -21,9 +23,9 @@ typedef enum {
 
 typedef struct {
     HttpMethod method;
-    char path[256];
+    char path[MAX_PATH_LENGTH];
     char body[MAX_REQUEST_SIZE];
-    char json_path[256];
+    char json_path[MAX_PATH_LENGTH];
 } HttpRequest;
 
 typedef struct {
@@ -35,7 +37,7 @@ typedef void (*RouteHandler)(HttpRequest*, HttpResponse*);
 
 typedef struct {
     HttpMethod method;
-    char path[256];
+    char path[MAX_PATH_LENGTH];
     RouteHandler handler;
 } Route;
 
@@ -48,20 +50,6 @@ typedef struct {
     int middleware_count;
 } WebFramework;
 
-void init_framework(WebFramework* framework);
-void add_route(WebFramework* framework, HttpMethod method, const char* path, RouteHandler handler);
-void add_middleware(WebFramework* framework, Middleware middleware);
-void handle_request(WebFramework* framework, HttpRequest* request, HttpResponse* response);
-void start_server(WebFramework* framework, int port);
-
-void send_response(int client_socket, HttpResponse* response);
-void parse_request(char* request_str, HttpRequest* request);
-const char* method_to_string(HttpMethod method);
-
-void Json_parser(char* request_str, HttpRequest* request);
-
-#define MAX_JSON_FIELDS 20
-
 typedef struct {
     char key[50];
     char value[256];
@@ -72,12 +60,26 @@ typedef struct {
     int field_count;
 } JsonObject;
 
-#define JSON_ADD_STRING(obj, k, v) \
-    strncpy(obj.fields[obj.field_count].key, k, sizeof(obj.fields[obj.field_count].key)); \
-    strncpy(obj.fields[obj.field_count].value, v, sizeof(obj.fields[obj.field_count].value)); \
-    obj.field_count++;
+// Function declarations
+void init_framework(WebFramework* framework);
+void add_route(WebFramework* framework, HttpMethod method, const char* path, RouteHandler handler);
+void add_middleware(WebFramework* framework, Middleware middleware);
+void handle_request(WebFramework* framework, HttpRequest* request, HttpResponse* response);
+void start_server(WebFramework* framework, int port);
+void send_response(int client_socket, HttpResponse* response);
+void parse_request(const char* request_str, HttpRequest* request);
+const char* method_to_string(HttpMethod method);
+void json_parser(const char* request_str, HttpRequest* request);
+void json_to_string(const JsonObject* obj, char* output, size_t output_size);
+void set_json_response_from_object(HttpResponse* response, int status_code, const JsonObject* json_obj);
 
-void json_to_string(JsonObject* obj, char* output, size_t output_size);
-void set_json_response_from_object(HttpResponse* response, int status_code, JsonObject* json_obj);
+#define JSON_ADD_STRING(obj, k, v) \
+    do { \
+        strncpy(obj.fields[obj.field_count].key, k, sizeof(obj.fields[obj.field_count].key) - 1); \
+        obj.fields[obj.field_count].key[sizeof(obj.fields[obj.field_count].key) - 1] = '\0'; \
+        strncpy(obj.fields[obj.field_count].value, v, sizeof(obj.fields[obj.field_count].value) - 1); \
+        obj.fields[obj.field_count].value[sizeof(obj.fields[obj.field_count].value) - 1] = '\0'; \
+        obj.field_count++; \
+    } while(0)
 
 #endif
