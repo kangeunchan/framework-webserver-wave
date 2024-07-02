@@ -8,5 +8,7 @@ void requestParse(WaveRequest *request, const char *rawRequest);
 char* requestGetHeader(WaveRequest *request, const char *key);
 char* requestGetParam(WaveRequest *request, const char *key);
 void requestFree(WaveRequest *request);
+const char* requestGetMethod(WaveRequest *request);
+const char* requestGetPath(WaveRequest *request);
 
 #endif // WAVE_REQUEST_H

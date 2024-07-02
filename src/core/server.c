@@ -40,7 +40,7 @@ void serverStart() {
     while (1) {
         int clientSocket;
         struct sockaddr_in clientAddr;
-        socklen_t clientAddrLen = sizeof(clientAddr);
+        long clientAddrLen = sizeof(clientAddr);
 
         clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
         if (clientSocket < 0) {
@@ -49,7 +49,7 @@ void serverStart() {
         }
 
         char buffer[BUFFER_SIZE];
-        ssize_t bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
+        long bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
         if (bytesRead > 0) {
             buffer[bytesRead] = '\0';
             WaveRequest* request = requestCreate();

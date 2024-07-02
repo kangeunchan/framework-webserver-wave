@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "router.h": "c",
+        "request.h": "c"
+    }
+}
