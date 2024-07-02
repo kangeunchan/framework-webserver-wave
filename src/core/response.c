@@ -18,7 +18,7 @@ char* serialize_response(const Response* response) {
         default: status_text = "Internal Server Error";
     }
     
-    char* response_str = malloc(1024); // Adjust size as needed
+    char* response_str = malloc(1024);
     snprintf(response_str, 1024, "HTTP/1.1 %d %s\r\nContent-Type: text/plain\r\nContent-Length: %zu\r\n\r\n%s",
             response->status, status_text, strlen(response->body), response->body);
     

@@ -22,7 +22,7 @@ Request* parse_request(const char* raw_request) {
     request->path = strdup(strtok(NULL, " "));
     request->body = strstr(raw_request, "\r\n\r\n");
     if (request->body) {
-        request->body = strdup(request->body + 4); // Skip "\r\n\r\n"
+        request->body = strdup(request->body + 4);
     } else {
         request->body = strdup("");
     }

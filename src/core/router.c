@@ -12,7 +12,7 @@ typedef struct {
 static Route* routes = NULL;
 static int route_count = 0;
 
-void add_route(HttpMethod method, const char* path, Response* (*handler)(const Request*)) {
+void routeAdd(HttpMethod method, const char* path, Response* (*handler)(const Request*)) {
     routes = realloc(routes, sizeof(Route) * (route_count + 1));
     routes[route_count].method = method;
     routes[route_count].path = strdup(path);

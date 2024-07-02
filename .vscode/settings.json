@@ -8,6 +8,8 @@
         "database.h": "c",
         "inet.h": "c",
         "string.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "unistd.h": "c",
+        "logger.h": "c"
     }
 }

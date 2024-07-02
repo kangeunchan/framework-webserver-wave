@@ -1,6 +1,11 @@
 #ifndef RESPONSE_H
 #define RESPONSE_H
 
+typedef enum {
+    Plain,
+    Json,
+} ResponseType;
+
 typedef struct {
     int status;
     char* body;

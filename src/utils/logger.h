@@ -1,6 +1,12 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-void log_info(const char* message);
+typedef enum {
+    INFO,
+    WARNING,
+    ERROR
+} LogType;
+
+void logger(const char* message, LogType type);
 
 #endif // LOGGER_H
