@@ -1,11 +1,7 @@
-#ifndef WAVE_DATABASE_H
-#define WAVE_DATABASE_H
+#ifndef DATABASE_H
+#define DATABASE_H
 
-typedef struct WaveDbResult WaveDbResult;
+void init_database(const char* db_name);
+void execute_query(const char* query);
 
-void dbConnect(const char *connectionString);
-WaveDbResult* dbQuery(const char *query);
-void dbFreeResult(WaveDbResult *result);
-void dbClose();
-
-#endif // WAVE_DATABASE_H
+#endif // DATABASE_H

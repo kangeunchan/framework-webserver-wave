@@ -1,19 +1,17 @@
 #include "middleware.h"
 #include <stdlib.h>
 
-#define MAX_MIDDLEWARES 10
+static Middleware* middlewares = NULL;
+static int middleware_count = 0;
 
-static WaveMiddlewareFunc middlewares[MAX_MIDDLEWARES];
-static int middlewareCount = 0;
-
-void middlewareAdd(WaveMiddlewareFunc func) {
-    if (middlewareCount < MAX_MIDDLEWARES) {
-        middlewares[middlewareCount++] = func;
-    }
+void use_middleware(Middleware middleware) {
+    middlewares = realloc(middlewares, sizeof(Middleware) * (middleware_count + 1));
+    middlewares[middleware_count] = middleware;
+    middleware_count++;
 }
 
-void middlewareExecute(WaveRequest *request, WaveResponse *response) {
-    for (int i = 0; i < middlewareCount; i++) {
-        middlewares[i](request, response);
+void execute_middlewares() {
+    for (int i = 0; i < middleware_count; i++) {
+        middlewares[i]();
     }
 }

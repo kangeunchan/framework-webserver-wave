@@ -1,22 +1,9 @@
 #include "template.h"
+#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-struct WaveTemplateContext {
-    int a;
-};
-
-char* templateRender(const char *templateString, WaveTemplateContext *context) {
-    return strdup(templateString);
-}
-
-WaveTemplateContext* templateContextCreate() {
-    return (WaveTemplateContext*)malloc(sizeof(WaveTemplateContext));
-}
-
-void templateContextSet(WaveTemplateContext *ctx, const char *key, const char *value) {
-}
-
-void templateContextFree(WaveTemplateContext *ctx) {
-    free(ctx);
+char* render_template(const char* template_name, const char* data) {
+    char* result = malloc(100);
+    snprintf(result, 100, "Rendered template: %s with data: %s", template_name, data);
+    return result;
 }

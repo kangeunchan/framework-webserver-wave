@@ -1,8 +1,6 @@
-#ifndef WAVE_SERVER_H
-#define WAVE_SERVER_H
+#ifndef SERVER_H
+#define SERVER_H
 
-void serverInit(int port);
-void serverStart();
-void serverStop();
+void start_server(int port);
 
-#endif // WAVE_SERVER_H
+#endif // SERVER_H

@@ -1,58 +1,33 @@
 #include "response.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
-struct WaveResponse {
-    int statusCode;
-    char headers[1000];
-    char body[1000];
-};
-
-WaveResponse* responseCreate() {
-    WaveResponse* response = (WaveResponse*)malloc(sizeof(WaveResponse));
-    response->statusCode = 200;
-    strcpy(response->headers, "Content-Type: text/html\r\n");
-    strcpy(response->body, "");
+Response* create_response(int status, const char* body) {
+    Response* response = malloc(sizeof(Response));
+    response->status = status;
+    response->body = strdup(body);
     return response;
 }
 
-void responseSetStatus(WaveResponse *response, int statusCode) {
-    response->statusCode = statusCode;
-}
-
-void responseSetHeader(WaveResponse *response, const char *key, const char *value) {
-    char header[200];
-    snprintf(header, sizeof(header), "%s: %s\r\n", key, value);
-    strcat(response->headers, header);
-}
-
-void responseSetBody(WaveResponse *response, const char *body) {
-    strncpy(response->body, body, sizeof(response->body) - 1);
-}
-
-char* responseToString(WaveResponse *response) {
-    char* fullResponse = malloc(2000);
-    char* send_start_line;
-    switch (response->statusCode) {
-    case 200:
-        send_start_line = "HTTP / 1.1 200 OK\r\n";
-        break;
-    case 404:
-        send_start_line = "HTTP / 1.1 404 NOT FOUND\r\n";
-        break;
-    case 500:
-        send_start_line = "HTTP / 1.1 500 REDIRECT\r\n";
-        break;
-    default:
-        send_start_line = "HTTP / 1.1 200 OK\r\n";
+char* serialize_response(const Response* response) {
+    char* status_text;
+    switch (response->status) {
+        case 200: status_text = "OK"; break;
+        case 404: status_text = "Not Found"; break;
+        default: status_text = "Internal Server Error";
     }
-    snprintf(fullResponse, 2000,
-        "%s%s\r\n%s",
-        send_start_line, response->headers, response->body);
-    return fullResponse;
+    
+    char* response_str = malloc(1024); // Adjust size as needed
+    snprintf(response_str, 1024, "HTTP/1.1 %d %s\r\nContent-Type: text/plain\r\nContent-Length: %zu\r\n\r\n%s",
+            response->status, status_text, strlen(response->body), response->body);
+    
+    return response_str;
 }
 
-void responseFree(WaveResponse *response) {
-    free(response);
+void free_response(Response* response) {
+    if (response) {
+        free(response->body);
+        free(response);
+    }
 }

@@ -1,12 +1,9 @@
-#ifndef WAVE_MIDDLEWARE_H
-#define WAVE_MIDDLEWARE_H
+#ifndef MIDDLEWARE_H
+#define MIDDLEWARE_H
 
-#include "../core/request.h"
-#include "../core/response.h"
+typedef void (*Middleware)(void);
 
-typedef void (*WaveMiddlewareFunc)(WaveRequest *request, WaveResponse *response);
+void use_middleware(Middleware middleware);
+void execute_middlewares();
 
-void middlewareAdd(WaveMiddlewareFunc func);
-void middlewareExecute(WaveRequest *request, WaveResponse *response);
-
-#endif // WAVE_MIDDLEWARE_H
+#endif // MIDDLEWARE_H

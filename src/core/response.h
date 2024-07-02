@@ -1,13 +1,13 @@
-#ifndef WAVE_RESPONSE_H
-#define WAVE_RESPONSE_H
+#ifndef RESPONSE_H
+#define RESPONSE_H
 
-typedef struct WaveResponse WaveResponse;
+typedef struct {
+    int status;
+    char* body;
+} Response;
 
-WaveResponse* responseCreate();
-void responseSetStatus(WaveResponse *response, int statusCode);
-void responseSetHeader(WaveResponse *response, const char *key, const char *value);
-void responseSetBody(WaveResponse *response, const char *body);
-char* responseToString(WaveResponse *response);
-void responseFree(WaveResponse *response);
+Response* create_response(int status, const char* body);
+char* serialize_response(const Response* response);
+void free_response(Response* response);
 
-#endif // WAVE_RESPONSE_H
+#endif // RESPONSE_H

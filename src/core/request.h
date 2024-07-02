@@ -1,14 +1,24 @@
-#ifndef WAVE_REQUEST_H
-#define WAVE_REQUEST_H
+#ifndef REQUEST_H
+#define REQUEST_H
 
-typedef struct WaveRequest WaveRequest;
+typedef enum {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    PATCH,
+    HEAD,
+    OPTIONS,
+    UNKNOWN
+} HttpMethod;
 
-WaveRequest* requestCreate();
-void requestParse(WaveRequest *request, const char *rawRequest);
-char* requestGetHeader(WaveRequest *request, const char *key);
-char* requestGetParam(WaveRequest *request, const char *key);
-void requestFree(WaveRequest *request);
-const char* requestGetMethod(WaveRequest *request);
-const char* requestGetPath(WaveRequest *request);
+typedef struct {
+    HttpMethod method;
+    char* path;
+    char* body;
+} Request;
 
-#endif // WAVE_REQUEST_H
+Request* parse_request(const char* raw_request);
+void free_request(Request* request);
+
+#endif // REQUEST_H

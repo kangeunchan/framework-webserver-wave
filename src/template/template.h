@@ -1,11 +1,6 @@
-#ifndef WAVE_TEMPLATE_H
-#define WAVE_TEMPLATE_H
+#ifndef TEMPLATE_H
+#define TEMPLATE_H
 
-typedef struct WaveTemplateContext WaveTemplateContext;
+char* render_template(const char* template_name, const char* data);
 
-char* templateRender(const char *templateString, WaveTemplateContext *context);
-WaveTemplateContext* templateContextCreate();
-void templateContextSet(WaveTemplateContext *ctx, const char *key, const char *value);
-void templateContextFree(WaveTemplateContext *ctx);
-
-#endif // WAVE_TEMPLATE_H
+#endif // TEMPLATE_H

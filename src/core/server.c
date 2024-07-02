@@ -1,76 +1,52 @@
-#include "wave.h"
 #include "server.h"
-#include "dispatcher.h"
+#include "request.h"
+#include "response.h"
+#include "router.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
 
-#define MAX_CLIENTS 10
-#define BUFFER_SIZE 1024
+void start_server(int port) {
+    int server_fd, new_socket;
+    struct sockaddr_in address;
+    int addrlen = sizeof(address);
 
-static int serverSocket;
-static int serverPort;
-
-void serverInit(int port) {
-    serverPort = port;
-}
-
-void serverStart() {
-    struct sockaddr_in serverAddr;
-
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (serverSocket == -1) {
-        perror("Socket creation failed");
+    if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
+        perror("socket failed");
         exit(EXIT_FAILURE);
     }
 
-    serverAddr.sin_family = AF_INET;
-    serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(serverPort);
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
 
-    if (bind(serverSocket, (struct sockaddr*)&serverAddr, sizeof(serverAddr)) < 0) {
-        perror("Binding failed");
+    if (bind(server_fd, (struct sockaddr*)&address, sizeof(address)) < 0) {
+        perror("bind failed");
         exit(EXIT_FAILURE);
     }
 
-    if (listen(serverSocket, MAX_CLIENTS) < 0) {
-        perror("Listen failed");
+    if (listen(server_fd, 3) < 0) {
+        perror("listen");
         exit(EXIT_FAILURE);
     }
 
-    printf("Server listening on port %d\n", serverPort);
+    printf("Server started on port %d\n", port);
 
-    while (1) {
-        int clientSocket;
-        struct sockaddr_in clientAddr;
-        long clientAddrLen = sizeof(clientAddr);
-
-        clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddr, &clientAddrLen);
-        if (clientSocket < 0) {
-            perror("Accept failed");
-            continue;
-        }
-
-        char buffer[BUFFER_SIZE];
-        long bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-        if (bytesRead > 0) {
-            buffer[bytesRead] = '\0';
-            WaveRequest* request = requestCreate();
-            WaveResponse* response = responseCreate();
-
-            requestParse(request, buffer);
-            serverDispatch(request, response);
-
-            char* responseStr = responseToString(response);
-            send(clientSocket, responseStr, strlen(responseStr), 0);
-
-            free(responseStr);
-            requestFree(request);
-            responseFree(response);
-        }
-
-        close(clientSocket);
+    while ((new_socket = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen)) >= 0) {
+        char buffer[1024] = {0};
+        read(new_socket, buffer, 1024);
+        
+        Request* request = parse_request(buffer);
+        Response* response = handle_request(request);
+        
+        char* response_str = serialize_response(response);
+        write(new_socket, response_str, strlen(response_str));
+        
+        free(response_str);
+        free_request(request);
+        free_response(response);
+        close(new_socket);
     }
-}
-
-void serverStop() {
-    close(serverSocket);
-    printf("Server stopped\n");
 }

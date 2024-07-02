@@ -1,38 +1,40 @@
-#include "wave.h"
 #include "request.h"
 #include <stdlib.h>
 #include <string.h>
-struct WaveRequest {
-    char method[10];
-    char path[100];
-    char headers[1000];
-    char body[1000];
-};
 
-WaveRequest* requestCreate() {
-    return (WaveRequest*)calloc(1, sizeof(WaveRequest));
+static HttpMethod parse_method(const char* method_str) {
+    if (strcmp(method_str, "GET") == 0) return GET;
+    if (strcmp(method_str, "POST") == 0) return POST;
+    if (strcmp(method_str, "PUT") == 0) return PUT;
+    if (strcmp(method_str, "DELETE") == 0) return DELETE;
+    if (strcmp(method_str, "PATCH") == 0) return PATCH;
+    if (strcmp(method_str, "HEAD") == 0) return HEAD;
+    if (strcmp(method_str, "OPTIONS") == 0) return OPTIONS;
+    return UNKNOWN;
 }
 
-void requestParse(WaveRequest *request, const char *rawRequest) {
-    sscanf(rawRequest, "%s %s", request->method, request->path);
+Request* parse_request(const char* raw_request) {
+    Request* request = malloc(sizeof(Request));
+    char* request_copy = strdup(raw_request);
+    
+    char* method_str = strtok(request_copy, " ");
+    request->method = parse_method(method_str);
+    request->path = strdup(strtok(NULL, " "));
+    request->body = strstr(raw_request, "\r\n\r\n");
+    if (request->body) {
+        request->body = strdup(request->body + 4); // Skip "\r\n\r\n"
+    } else {
+        request->body = strdup("");
+    }
+    
+    free(request_copy);
+    return request;
 }
 
-char* requestGetHeader(WaveRequest *request, const char *key) {
-    return NULL;
-}
-
-char* requestGetParam(WaveRequest *request, const char *key) {
-    return NULL;
-}
-
-void requestFree(WaveRequest *request) {
-    free(request);
-}
-
-const char* requestGetMethod(WaveRequest *request) {
-    return request->method;
-}
-
-const char* requestGetPath(WaveRequest *request) {
-    return request->path;
+void free_request(Request* request) {
+    if (request) {
+        free(request->path);
+        free(request->body);
+        free(request);
+    }
 }

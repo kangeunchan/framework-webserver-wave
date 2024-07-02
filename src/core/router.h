@@ -1,13 +1,10 @@
-#ifndef WAVE_ROUTER_H
-#define WAVE_ROUTER_H
+#ifndef ROUTER_H
+#define ROUTER_H
 
 #include "request.h"
 #include "response.h"
 
-typedef void (*WaveHandler)(WaveRequest *request, WaveResponse *response);
+void add_route(HttpMethod method, const char* path, Response* (*handler)(const Request*));
+Response* handle_request(const Request* request);
 
-void routerInit();
-void routerAddRoute(const char *path, const char *method, WaveHandler handler);
-WaveHandler routerFindHandler(const char *path, const char *method);
-
-#endif // WAVE_ROUTER_H
+#endif // ROUTER_H
