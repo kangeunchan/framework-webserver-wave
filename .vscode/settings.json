@@ -10,6 +10,8 @@
         "string.h": "c",
         "stdlib.h": "c",
         "unistd.h": "c",
-        "logger.h": "c"
+        "logger.h": "c",
+        "thread_pool.h": "c",
+        "template.h": "c"
     }
 }
