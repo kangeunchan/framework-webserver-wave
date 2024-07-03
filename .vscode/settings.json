@@ -1,0 +1,13 @@
+{
+    "files.associations": {
+        "wave.h": "c",
+        "stdio.h": "c",
+        "logger.h": "c",
+        "stdlib.h": "c",
+        "errno.h": "c",
+        "settings.h": "c",
+        "string.h": "c",
+        "dispatcher.h": "c",
+        "server.h": "c"
+    }
+}
