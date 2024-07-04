@@ -1,7 +1,6 @@
-
 #include "../include/wave.h"
 
-#define INITIAL_CAPACITY 10 ;
+#define INITIAL_CAPACITY 10
 
 void waveFileReader(char *filename, char *path) {
     FILE *fp;
@@ -15,10 +14,12 @@ void waveFileReader(char *filename, char *path) {
     extension = strrchr(filename, '.');
     if (extension == NULL || strcmp(extension, ".wave") != 0) {
         log(ERROR, "FILE EXTENSION IS NOT .wave");
+        return;
     }
 
     if (filename == NULL || path == NULL) {
         log(ERROR, "FILE NAME OR PATH IS NULL");
+        return;
     }
 
     snprintf(pathMessage, PATH_MAX, "SETTING FILE PATH: %s/%s", path, filename);
@@ -29,11 +30,14 @@ void waveFileReader(char *filename, char *path) {
     fp = fopen(fullPath, "r");
     if (fp == NULL) {
         log(ERROR, "FILE OPEN ERROR");
+        return;
     }
 
     keyValuePairs = (KeyValue *)malloc(capacity * sizeof(KeyValue));
     if (keyValuePairs == NULL) {
         log(ERROR, "MEMORY ALLOCATION ERROR");
+        fclose(fp);
+        return;
     }
 
     char line[1024];
@@ -52,13 +56,17 @@ void waveFileReader(char *filename, char *path) {
 
                 if (size >= capacity) {
                     capacity *= 2;
-                    keyValuePairs = (KeyValue *)realloc(keyValuePairs, capacity * sizeof(KeyValue));
-                    if (keyValuePairs == NULL) {
+                    KeyValue *temp = (KeyValue *)realloc(keyValuePairs, capacity * sizeof(KeyValue));
+                    if (temp == NULL) {
                         log(ERROR, "MEMORY REALLOCATION ERROR");
+                        break;
                     }
+                    keyValuePairs = temp;
                 }
             } else {
-                log(ERROR, "MEMORY REALLOCATION ERROR");
+                free(trimmedKey);
+                free(trimmedValue);
+                log(ERROR, "MEMORY ALLOCATION ERROR FOR KEY OR VALUE");
             }
         }
     }
