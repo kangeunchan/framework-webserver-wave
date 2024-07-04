@@ -38,7 +38,7 @@ void* clientHandler(void* arg) {
         return NULL;
     }
 
-    log(INFO, "REQUEST RECEIVED: %s");
+    log(INFO, "REQUEST RECEIVED: %s", buffer);
 
     // Parse the request
     Request* req = parseRequest(buffer);
@@ -74,7 +74,7 @@ void* clientHandler(void* arg) {
 
     log(INFO, "Sending response");
     ssize_t bytes_written = write(socket, response_str, strlen(response_str));
-    log(INFO, "Bytes written: %zd");
+    log(INFO, "Bytes written: %zd", bytes_written);
     log(INFO, "RESPONSE SENT");
 
     // Clean up
@@ -142,4 +142,4 @@ void _server_start(ServerInfo infos) {
             continue;
         }
         *client_sock = new_socket;
-        threadPool(ADD, 0, infos.THREAD_POOL, clientHandler, client
+        threadPool(ADD, infos.THREAD_POOL, clientHandler, client
