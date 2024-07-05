@@ -4,11 +4,12 @@
 typedef enum {
     LOG_INFO,
     LOG_WARN,
-    LOG_ERROR
+    LOG_ERROR,
+    LOG_DEBUG
 } LogLevel;
 
-void log_message(LogLevel level, const char* format, ...);
 void log_init(const char* file_name);
 void log_close();
+void log_message(LogLevel level, const char* format, ...);
 
-#endif
+#endif // LOGGER_H

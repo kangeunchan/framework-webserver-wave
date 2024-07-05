@@ -1,9 +1,5 @@
 {
     "files.associations": {
-        "application.h": "c",
-        "logger.h": "c",
-        "http_server.h": "c",
-        "http_response.h": "c",
-        "http_request.h": "c"
+        "logger.h": "c"
     }
 }

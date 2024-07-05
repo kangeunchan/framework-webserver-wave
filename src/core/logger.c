@@ -9,17 +9,20 @@
 #define COLOR_INFO    "\x1b[32m" // Green
 #define COLOR_WARN    "\x1b[33m" // Yellow
 #define COLOR_ERROR   "\x1b[31m" // Red
+#define COLOR_DEBUG   "\x1b[34m" // Blue // 추가된 색상 정의
 
 static const char* LOG_LEVEL_NAMES[] = {
     "INFO",
     "WARN",
-    "ERROR"
+    "ERROR",
+    "DEBUG" // 추가된 로그 레벨 이름
 };
 
 static const char* LOG_LEVEL_COLORS[] = {
     COLOR_INFO,
     COLOR_WARN,
-    COLOR_ERROR
+    COLOR_ERROR,
+    COLOR_DEBUG // 추가된 로그 레벨 색상
 };
 
 // Mutex for synchronizing log access

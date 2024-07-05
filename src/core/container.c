@@ -1,4 +1,3 @@
-// container.c
 #include "container.h"
 #include <stdlib.h>
 #include <string.h>
