@@ -1,5 +1,7 @@
 {
     "files.associations": {
-        "logger.h": "c"
+        "json.h": "c",
+        "http_server.h": "c",
+        "stdio.h": "c"
     }
 }

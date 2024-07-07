@@ -9,5 +9,5 @@ void http_response_add_header(HttpResponse* response, const char* name, const ch
 void http_response_set_body(HttpResponse* response, const char* body);
 char* http_response_to_string(HttpResponse* response);
 void http_response_destroy(HttpResponse* response);
-
+void http_response_set_json_body(HttpResponse* response, const char** keys, const char** values, int pair_count);
 #endif

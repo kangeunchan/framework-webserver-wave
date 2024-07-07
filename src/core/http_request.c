@@ -6,14 +6,23 @@
 
 #define MAX_HEADERS 20
 
-struct HttpRequest {
+typedef struct HttpRequest {
     char method[10];
     char path[100];
     char version[10];
     char* headers[MAX_HEADERS];
     int header_count;
     char* body;
-};
+} HttpRequest;
+
+static char* extract_line(const char** start, const char* end) {
+    const char* eol = strchr(*start, '\n');
+    if (!eol || eol > end) eol = end;
+    size_t len = eol - *start;
+    char* line = strndup(*start, len);
+    *start = eol + 1;
+    return line;
+}
 
 HttpRequest* http_request_parse(const char* raw_request) {
     log_message(LOG_INFO, "Parsing HTTP request");
@@ -29,7 +38,6 @@ HttpRequest* http_request_parse(const char* raw_request) {
         free(request);
         return NULL;
     }
-    log_message(LOG_INFO, "Parsed request line: method=%s, path=%s, version=%s", request->method, request->path, request->version);
 
     const char* header_start = strchr(raw_request, '\n');
     if (!header_start) {
@@ -37,44 +45,29 @@ HttpRequest* http_request_parse(const char* raw_request) {
         free(request);
         return NULL;
     }
-    header_start += 1;
-    const char* body_start = strstr(header_start, "\r\n\r\n");
-    
-    if (body_start) {
-        const char* header_end = body_start;
-        while (header_start < header_end && request->header_count < MAX_HEADERS) {
-            int header_len = strchr(header_start, '\n') - header_start;
-            request->headers[request->header_count] = strndup(header_start, header_len);
-            if (!request->headers[request->header_count]) {
-                log_message(LOG_ERROR, "Failed to allocate memory for header");
-                http_request_destroy(request);
-                return NULL;
-            }
-            log_message(LOG_INFO, "Added header: %s", request->headers[request->header_count]);
-            request->header_count++;
-            header_start += header_len + 1;
-        }
+    header_start++;
 
+    const char* body_start = strstr(header_start, "\r\n\r\n");
+    const char* header_end = body_start ? body_start : header_start + strlen(header_start);
+
+    while (header_start < header_end && request->header_count < MAX_HEADERS) {
+        request->headers[request->header_count++] = extract_line(&header_start, header_end);
+        if (!request->headers[request->header_count - 1]) {
+            http_request_destroy(request);
+            return NULL;
+        }
+    }
+
+    if (body_start) {
         request->body = strdup(body_start + 4);
         if (!request->body) {
             log_message(LOG_ERROR, "Failed to allocate memory for body");
             http_request_destroy(request);
             return NULL;
         }
-        log_message(LOG_INFO, "Parsed body: %s", request->body);
-    } else {
-        log_message(LOG_WARN, "No body found in request");
     }
 
     return request;
-}
-
-const char* http_request_get_method(HttpRequest* request) {
-    return request->method;
-}
-
-const char* http_request_get_path(HttpRequest* request) {
-    return request->path;
 }
 
 void http_request_destroy(HttpRequest* request) {
@@ -86,5 +79,23 @@ void http_request_destroy(HttpRequest* request) {
         free(request->body);
         free(request);
         log_message(LOG_INFO, "HTTP request destroyed successfully");
+    } else {
+        log_message(LOG_WARN, "Tried to destroy NULL HTTP request");
     }
+}
+
+const char* http_request_get_method(HttpRequest* request) {
+    return request ? request->method : NULL;
+}
+
+const char* http_request_get_path(HttpRequest* request) {
+    return request ? request->path : NULL;
+}
+
+const char* http_request_get_version(HttpRequest* request) {
+    return request ? request->version : NULL;
+}
+
+const char* http_request_get_body(HttpRequest* request) {
+    return request ? request->body : NULL;
 }

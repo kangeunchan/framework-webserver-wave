@@ -1,0 +1,59 @@
+@startuml
+package "Application" {
+    class Application {
+        +main()
+    }
+
+    class Container {
+        +container_init()
+        +container_free()
+    }
+
+    class HttpServer {
+        +http_server_init()
+        +http_server_start()
+        +http_server_free()
+    }
+
+    class Router {
+        +router_init()
+        +router_free()
+    }
+
+    class Logger {
+        +logger_init()
+        +logger_free()
+    }
+
+    class HttpRequest {
+        +parse_request()
+        +free_request()
+    }
+
+    class HttpResponse {
+        +create_response()
+        +free_response()
+    }
+
+    class Json {
+        +json_parse()
+        +json_serialize()
+    }
+
+    class ThreadPool {
+        +thread_pool_init()
+        +thread_pool_execute()
+        +thread_pool_free()
+    }
+
+    Application --> Container : uses
+    Application --> HttpServer : uses
+    HttpServer --> Container : uses
+    HttpServer --> Router : uses
+    HttpServer --> Logger : uses
+    Router --> HttpRequest : handles
+    Router --> HttpResponse : handles
+    Container --> Json : uses
+    Container --> ThreadPool : uses
+}
+@enduml

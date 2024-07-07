@@ -1,17 +1,23 @@
-#include "core/application.h"
-#include "web/controller.h"
-#include "core/logger.h"
+#include "wave.h"
+#include <stdio.h>
+
+int visitNum = 0;
+
+void visit(HttpRequest* req, HttpResponse* res) {
+    visitNum++;
+    char * message;
+    snprintf(message, 2, "hi");
+    http_response_set_body(res, message);
+}
 
 int main() {
-    
+
     log_init("./logs/app.log");
 
     Application* app = application_create();
-    
 
+    router_add_route(app->router, "GET", "/visit", visit);
 
-    router_add_route(app->router, "GET", "/", hello_world);
-    
     application_run(app);
     application_destroy(app);
     
